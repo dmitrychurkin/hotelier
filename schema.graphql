@@ -1,0 +1,46 @@
+scalar DateTime
+
+type Query {
+  userById(id: ID!): User
+  userByEmail(email: String!): User
+  users: [User!]!
+}
+
+type Mutation {
+  login(email: String!, password: String!): User
+  signup(
+    email: String!
+    firstName: String
+    lastName: String
+    password: String!
+    confirmPassword: String!
+  ): User
+  sendPasswordResetLink(email: String!): User
+  resetPassword(
+    email: String!,
+    password: String!,
+    confirmPassword: String!
+    passwordResetToken: String!
+  ): User
+
+}
+
+enum UserRoles {
+  ADMIN
+  OWNER
+  EMPLOYER
+}
+
+type User {
+  id: ID!
+  email: String!
+  firstName: String
+  lastName: String
+  password: String!
+  passwordResetToken: String
+  passwordResetTokenCreatedAt: DateTime
+  passwordResetTokenExpiresAt: DateTime
+  role: UserRoles!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}

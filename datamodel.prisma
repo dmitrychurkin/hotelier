@@ -1,0 +1,19 @@
+enum UserRoles {
+  ADMIN
+  OWNER
+  EMPLOYER
+}
+
+type User {
+  id: ID! @id
+  email: String! @unique
+  firstName: String
+  lastName: String
+  password: String!
+  passwordResetToken: String
+  passwordResetTokenCreatedAt: DateTime
+  passwordResetTokenExpiresAt: DateTime
+  role: UserRoles! @default(value: ADMIN)
+  createdAt: DateTime! @createdAt
+  updatedAt: DateTime! @updatedAt
+}

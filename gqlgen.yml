@@ -1,0 +1,20 @@
+# .gqlgen.yml example
+#
+# Refer to https://gqlgen.com/config/
+# for detailed .gqlgen.yml documentation.
+
+schema:
+- schema.graphql
+exec:
+  filename: server/generated.go
+omit_slice_element_pointers: true
+model:
+  filename: server/models_gen.go
+models:
+  User:
+    model: prisma.User
+resolver:
+  filename: server/resolver.go
+  type: Resolver
+autobind:
+  - github.com/dmitrychurkin/hotelier/server/prisma-generated/prisma-client
