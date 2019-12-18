@@ -53,9 +53,9 @@ func LoginHandler(ctx context.Context, p *prisma.Client, email string, password 
 		return nil, errors.New("We don't have records with associated credentials")
 	}
 
-	// 4. issue access and refresh token
+	// 4. issue auth token
 	// 5. set headers
-	if err := issueTokens(ctx, user); err != nil {
+	if err := issueAuthToken(ctx, user); err != nil {
 		return nil, err
 	}
 
@@ -93,11 +93,9 @@ func SignupHandler(ctx context.Context, p *prisma.Client, email string, firstNam
 		roundsHash         = 14
 	)
 
-	if len(passwordHashRounds) != 0 {
-		r, err := strconv.Atoi(passwordHashRounds)
-		if err == nil {
-			roundsHash = r
-		}
+	r, err := strconv.Atoi(passwordHashRounds)
+	if err == nil {
+		roundsHash = r
 	}
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), roundsHash)
@@ -117,76 +115,56 @@ func SignupHandler(ctx context.Context, p *prisma.Client, email string, firstNam
 		return nil, err
 	}
 
-	// 4. issue access and refresh token
+	// 4. issue auth token
 	// 5. set headers
-	if err := issueTokens(ctx, user); err != nil {
+	if err := issueAuthToken(ctx, user); err != nil {
 		return nil, err
 	}
 
 	return user, nil
 }
 
-func issueTokens(ctx context.Context, user *prisma.User) error {
+func issueAuthToken(ctx context.Context, user *prisma.User) error {
 	var (
-		accessTokenKey      = os.Getenv("ACCESS_TOKEN_SECRET")
-		accessTokenLifetime = os.Getenv("ACCESS_TOKEN_LIFETIME")
-		accessTokenMin      = 5
+		authTokenSecret     = os.Getenv("AUTH_TOKEN_SECRET")
+		authTokenLifetime   = os.Getenv("AUTH_TOKEN_LIFETIME")
+		authTokenHeaderName = os.Getenv("AUTH_TOKEN_HEADER_NAME")
+		authTokenMin        = 5
 	)
 
-	if len(accessTokenKey) == 0 {
-		accessTokenKey = "jwt_access_secret|123"
+	if len(authTokenSecret) == 0 {
+		authTokenSecret = "jwt_access_secret|123"
 	}
 
-	if len(accessTokenLifetime) != 0 {
-		d, err := strconv.Atoi(accessTokenLifetime)
-		if err == nil {
-			accessTokenMin = d
-		}
+	d, err := strconv.Atoi(authTokenLifetime)
+	if err == nil {
+		authTokenMin = d
 	}
 
-	accessTokenClaims := &jwt.StandardClaims{
+	authTokenClaims := &jwt.StandardClaims{
 		Subject:   user.ID,
-		ExpiresAt: time.Now().Add(time.Duration(accessTokenMin) * time.Minute).Unix(),
+		ExpiresAt: time.Now().Add(time.Duration(authTokenMin) * time.Minute).Unix(),
 	}
 
-	accessToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, accessTokenClaims).SignedString([]byte(accessTokenKey))
+	authToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, authTokenClaims).SignedString([]byte(authTokenSecret))
 
 	if err != nil {
 		return err
 	}
 
-	var (
-		refreshTokenKey      = os.Getenv("REFRESH_TOKEN_SECRET")
-		refreshTokenLifetime = os.Getenv("REFRESH_TOKEN_LIFETIME")
-		refreshTokenMin      = 300
-	)
-
-	if len(refreshTokenKey) == 0 {
-		refreshTokenKey = "jwt_refresh_secret|987"
+	if len(authTokenHeaderName) == 0 {
+		authTokenHeaderName = "x-auth-token"
 	}
 
-	if len(refreshTokenLifetime) != 0 {
-		d, err := strconv.Atoi(refreshTokenLifetime)
-		if err == nil {
-			refreshTokenMin = d
-		}
-	}
-
-	refreshTokenClaims := &jwt.StandardClaims{
-		Subject:   user.ID,
-		ExpiresAt: time.Now().Add(time.Duration(refreshTokenMin) * time.Minute).Unix(),
-	}
-
-	refreshToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshTokenClaims).SignedString([]byte(refreshTokenKey))
-
+	gc, err := GinContextFromContext(ctx)
 	if err != nil {
 		return err
 	}
 
-	ctxData := ctx.Value(dataCtxKey).(*contextData)
-	ctxData.Res.Header().Set("Access-Control-Expose-Headers", "x-access-token,x-refresh-token")
-	ctxData.Res.Header().Set("x-access-token", accessToken)
-	ctxData.Res.Header().Set("x-refresh-token", refreshToken)
+	res := gc.Writer
+
+	res.Header().Set("Access-Control-Expose-Headers", authTokenHeaderName)
+	res.Header().Set(authTokenHeaderName, authToken)
 
 	return nil
 }

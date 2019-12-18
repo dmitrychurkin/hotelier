@@ -8,12 +8,11 @@ import (
 
 	"os"
 
-	"github.com/joho/godotenv"
+	_ "github.com/joho/godotenv/autoload"
 	"github.com/machinebox/graphql"
 	"github.com/prisma/prisma-client-lib-go"
 )
 
-var _ = godotenv.Load()
 var ErrNoResult = errors.New("query returned no result")
 
 func Str(v string) *string { return &v }

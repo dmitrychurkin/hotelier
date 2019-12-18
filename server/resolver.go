@@ -42,11 +42,15 @@ type queryResolver struct{ *Resolver }
 
 func (r *queryResolver) UserByID(ctx context.Context, id string) (*prisma.User, error) {
 	// panic("not implemented")
-	contextData := ctx.Value(dataCtxKey).(*contextData)
-	contextData.Res.Header().Set("Access-Control-Expose-Headers", "*")
-	contextData.Res.Header().Set("x-access-token", "12345")
-	contextData.Res.Header().Set("x-refresh-token", "54321")
-	fmt.Println(contextData.Req.Header.Get("x-test-context"))
+	gc, err := GinContextFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	req, res := gc.Request, gc.Writer
+	res.Header().Set("Access-Control-Expose-Headers", "*")
+	res.Header().Set("x-access-token", "12345")
+	res.Header().Set("x-refresh-token", "54321")
+	fmt.Println(req.Header.Get("x-test-context"))
 	return nil, errors.New("Work in progress :)")
 }
 func (r *queryResolver) UserByEmail(ctx context.Context, email string) (*prisma.User, error) {
@@ -54,10 +58,13 @@ func (r *queryResolver) UserByEmail(ctx context.Context, email string) (*prisma.
 }
 func (r *queryResolver) Users(ctx context.Context) ([]prisma.User, error) {
 	// panic("not implemented")
-	contextData := ctx.Value(dataCtxKey).(*contextData)
-	fmt.Printf("%+v\n", contextData)
+	gc, err := GinContextFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Printf("%+v\n", gc)
 	// Loop over header names
-	for name, values := range contextData.Req.Header {
+	for name, values := range gc.Request.Header {
 		// Loop over all values for the name.
 		for _, value := range values {
 			fmt.Println(name, value)
