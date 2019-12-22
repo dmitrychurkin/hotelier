@@ -7,8 +7,9 @@ import (
 
 	"github.com/99designs/gqlgen/handler"
 	"github.com/dmitrychurkin/hotelier/server/prisma-generated/prisma-client"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/rs/cors"
+	// "github.com/rs/cors"
 )
 
 type contextKey struct {
@@ -23,8 +24,14 @@ func main() {
 		resolvers = &Resolver{Prisma: prisma.New(nil)}
 		server    = gin.Default()
 	)
-
-	server.Use(corsMiddleware(), contextToContextMiddleware())
+	server.RedirectTrailingSlash = true
+	server.Use(cors.New(cors.Config{
+		// AllowOrigins: []string{"*"},
+		AllowAllOrigins: true,
+		AllowHeaders:    []string{"*"},
+		ExposeHeaders:   []string{"x-auth-token"},
+	}))
+	server.Use(contextToContextMiddleware())
 
 	server.POST("/query", graphqlHandler(Config{Resolvers: resolvers}))
 	server.GET("/", playgroundHandler())
@@ -59,16 +66,16 @@ func contextToContextMiddleware() gin.HandlerFunc {
 }
 
 // Development only middleware
-func corsMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		cors.New(cors.Options{
-			AllowedOrigins: []string{"*"},
-			AllowedHeaders: []string{"*"},
-		}).HandlerFunc(c.Writer, c.Request)
+// func corsMiddleware() gin.HandlerFunc {
+// 	return func(c *gin.Context) {
+// 		cors.New(cors.Options{
+// 			AllowedOrigins: []string{"*"},
+// 			AllowedHeaders: []string{"*"},
+// 		}).HandlerFunc(c.Writer, c.Request)
 
-		c.Next()
-	}
-}
+// 		c.Next()
+// 	}
+// }
 
 // TODO: set up request rate limiter middleware
 

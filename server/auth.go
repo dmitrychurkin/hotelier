@@ -3,18 +3,64 @@ package main
 import (
 	"context"
 	"errors"
+	"net/http"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
-	"github.com/dmitrychurkin/hotelier/server/prisma-generated/prisma-client"
+	jwt "github.com/dgrijalva/jwt-go"
+	prisma "github.com/dmitrychurkin/hotelier/server/prisma-generated/prisma-client"
+	"github.com/vektah/gqlparser/gqlerror"
 	"golang.org/x/crypto/bcrypt"
 )
 
 const reEmail = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
+const (
+	defaultTokenSecret     = "jwt_access_secret|123"
+	defaultTokenHeaderName = "x-auth-token"
+	bearerSchema           = "Bearer "
+	defaultTokenLifetime   = 300
+)
+
+// UserHandler resolver
+func UserHandler(ctx context.Context, p *prisma.Client) (*prisma.User, error) {
+	// 1. get jwt token claims
+	claims, err := parseAuthToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if claims == nil {
+		return nil, &gqlerror.Error{
+			Message: "Unautorized",
+			Extensions: map[string]interface{}{
+				"code": http.StatusUnauthorized,
+			},
+		}
+	}
+
+	// 2. query user
+	user, err := p.User(prisma.UserWhereUniqueInput{
+		ID: &claims.Subject,
+	}).Exec(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if user == nil {
+		return nil, errors.New("We don't have records with associated credentials")
+	}
+
+	// 3. issue auth token
+	// 4. set headers
+	if err := issueAuthToken(ctx, user); err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
 
 // LoginHandler resolver
 func LoginHandler(ctx context.Context, p *prisma.Client, email string, password string) (*prisma.User, error) {
@@ -124,16 +170,61 @@ func SignupHandler(ctx context.Context, p *prisma.Client, email string, firstNam
 	return user, nil
 }
 
+func parseAuthToken(ctx context.Context) (*jwt.StandardClaims, error) {
+	var authTokenSecret = os.Getenv("AUTH_TOKEN_SECRET")
+
+	if len(authTokenSecret) == 0 {
+		authTokenSecret = defaultTokenSecret
+	}
+
+	gc, err := GinContextFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// 1. get token from req header
+	t := gc.Request.Header.Get("Authorization")
+
+	if len(t) > 0 {
+		splitToken := strings.Split(t, bearerSchema)
+		if len(splitToken) == 2 {
+			t = strings.TrimSpace(splitToken[1])
+		} else {
+			t = ""
+		}
+	}
+
+	if len(t) == 0 {
+		return nil, nil
+	}
+
+	// 2. parse token claims
+	claims := &jwt.StandardClaims{}
+	jwtToken, err := jwt.ParseWithClaims(t, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte(authTokenSecret), nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !jwtToken.Valid {
+		return nil, nil
+	}
+
+	return claims, err
+}
+
 func issueAuthToken(ctx context.Context, user *prisma.User) error {
 	var (
 		authTokenSecret     = os.Getenv("AUTH_TOKEN_SECRET")
 		authTokenLifetime   = os.Getenv("AUTH_TOKEN_LIFETIME")
 		authTokenHeaderName = os.Getenv("AUTH_TOKEN_HEADER_NAME")
-		authTokenMin        = 5
+		authTokenMin        = defaultTokenLifetime
 	)
 
 	if len(authTokenSecret) == 0 {
-		authTokenSecret = "jwt_access_secret|123"
+		authTokenSecret = defaultTokenSecret
 	}
 
 	d, err := strconv.Atoi(authTokenLifetime)
@@ -153,7 +244,7 @@ func issueAuthToken(ctx context.Context, user *prisma.User) error {
 	}
 
 	if len(authTokenHeaderName) == 0 {
-		authTokenHeaderName = "x-auth-token"
+		authTokenHeaderName = defaultTokenHeaderName
 	}
 
 	gc, err := GinContextFromContext(ctx)

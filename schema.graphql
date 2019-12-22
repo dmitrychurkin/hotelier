@@ -4,6 +4,7 @@ type Query {
   userById(id: ID!): User
   userByEmail(email: String!): User
   users: [User!]!
+  user: User
 }
 
 type Mutation {
@@ -17,12 +18,11 @@ type Mutation {
   ): User
   sendPasswordResetLink(email: String!): User
   resetPassword(
-    email: String!,
-    password: String!,
+    email: String!
+    password: String!
     confirmPassword: String!
     passwordResetToken: String!
   ): User
-
 }
 
 enum UserRoles {

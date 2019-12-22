@@ -78,3 +78,6 @@ func (r *queryResolver) Users(ctx context.Context) ([]prisma.User, error) {
 	// fmt.Fprintf(contextData.Res, "RemoteAddr= %q\n", contextData.Req.RemoteAddr)
 	return nil, errors.New("Invalid request")
 }
+func (r *queryResolver) User(ctx context.Context) (*prisma.User, error) {
+	return UserHandler(ctx, r.Prisma)
+}

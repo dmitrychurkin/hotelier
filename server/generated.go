@@ -51,6 +51,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
+		User        func(childComplexity int) int
 		UserByEmail func(childComplexity int, email string) int
 		UserByID    func(childComplexity int, id string) int
 		Users       func(childComplexity int) int
@@ -81,6 +82,7 @@ type QueryResolver interface {
 	UserByID(ctx context.Context, id string) (*prisma.User, error)
 	UserByEmail(ctx context.Context, email string) (*prisma.User, error)
 	Users(ctx context.Context) ([]prisma.User, error)
+	User(ctx context.Context) (*prisma.User, error)
 }
 
 type executableSchema struct {
@@ -145,6 +147,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.Signup(childComplexity, args["email"].(string), args["firstName"].(*string), args["lastName"].(*string), args["password"].(string), args["confirmPassword"].(string)), true
+
+	case "Query.user":
+		if e.complexity.Query.User == nil {
+			break
+		}
+
+		return e.complexity.Query.User(childComplexity), true
 
 	case "Query.userByEmail":
 		if e.complexity.Query.UserByEmail == nil {
@@ -322,6 +331,7 @@ type Query {
   userById(id: ID!): User
   userByEmail(email: String!): User
   users: [User!]!
+  user: User
 }
 
 type Mutation {
@@ -335,12 +345,11 @@ type Mutation {
   ): User
   sendPasswordResetLink(email: String!): User
   resetPassword(
-    email: String!,
-    password: String!,
+    email: String!
+    password: String!
     confirmPassword: String!
     passwordResetToken: String!
   ): User
-
 }
 
 enum UserRoles {
@@ -848,6 +857,40 @@ func (ec *executionContext) _Query_users(ctx context.Context, field graphql.Coll
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNUser2ᚕgithubᚗcomᚋdmitrychurkinᚋhotelierᚋserverᚋprismaᚑgeneratedᚋprismaᚑclientᚐUserᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_user(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().User(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*prisma.User)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOUser2ᚖgithubᚗcomᚋdmitrychurkinᚋhotelierᚋserverᚋprismaᚑgeneratedᚋprismaᚑclientᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2559,6 +2602,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
+				return res
+			})
+		case "user":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_user(ctx, field)
 				return res
 			})
 		case "__type":

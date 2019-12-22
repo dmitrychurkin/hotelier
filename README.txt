@@ -205,3 +205,37 @@ FE:
 
 ? how to send mutation in graphql playground
 	- https://github.com/graphql/graphiql/issues/72
+
+? regex email golang
+	- https://www.golangprograms.com/regular-expression-to-validate-email-address.html
+
+? golang i18n support
+	- https://github.com/nicksnyder/go-i18n
+
+? golang rate limiter middleware
+	- https://www.alexedwards.net/blog/how-to-rate-limit-http-requests
+	- https://github.com/didip/tollbooth_gin
+
+? gqlgen rate limiting
+	- https://go.libhunt.com/limiter-alternatives
+	- https://github.com/ulule/limiter
+
+	- https://www.freecodecamp.org/news/deep-dive-into-graphql-with-golang-d3e02a429ac3/
+	- http://marcio.io/2015/07/handling-1-million-requests-per-minute-with-golang/
+
+? gqlgen get request from ctx
+	- https://github.com/99designs/gqlgen/issues/765
+
+? golang gin redirect from trailing slash
+	- https://github.com/gin-gonic/gin/issues/915
+	- https://github.com/gin-gonic/gin/issues/482
+	- https://github.com/gin-gonic/gin/issues/349
+
+? golang slice methods
+	- https://blog.golang.org/go-slices-usage-and-internals
+	- https://www.geeksforgeeks.org/slices-in-golang/
+	- https://stackoverflow.com/questions/22535775/how-to-get-the-last-element-of-a-slice
+	!!!!! - https://github.com/golang/go/wiki/SliceTricks !!!!!!
+
+? golang get token from authorization header bearer
+	- https://stackoverflow.com/questions/39518237/how-to-extract-and-verify-token-sent-from-frontend-in-golang
