@@ -321,9 +321,10 @@ func SendPasswordResetLink(ctx context.Context, p *prisma.Client, email, path st
 
 	emailAgent := mailer.ResetPasswordData{Link: link}
 	success, err = emailAgent.Send(&mailer.MailRequest{
-		From:  "no-reply@" + host,
-		To:    []string{user.Email},
-		Title: "Reset Password Email",
+		// uncomment on prod
+		// From:  "no-reply@" + host,
+		// Title: "Reset Password Email",
+		To: []string{user.Email},
 	})
 	return &success, err
 }
