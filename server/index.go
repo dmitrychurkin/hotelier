@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/99designs/gqlgen/handler"
-	"github.com/dmitrychurkin/hotelier/server/prisma-generated/prisma-client"
+	"github.com/dmitrychurkin/hotelier/server/graph/generated"
+	"github.com/dmitrychurkin/hotelier/server/prisma-client"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	// "github.com/rs/cors"
@@ -21,26 +23,32 @@ var ginContextKey = &contextKey{"GinContextKey"}
 
 func main() {
 	var (
-		resolvers = &Resolver{Prisma: prisma.New(nil)}
-		server    = gin.Default()
+		resolvers     = &Resolver{Prisma: prisma.New(nil)}
+		server        = gin.Default()
+		allowedOrigin = os.Getenv("ALLOWED_ORIGIN")
 	)
+
+	if len(allowedOrigin) == 0 {
+		allowedOrigin = "http://localhost:3000"
+	}
+
 	server.RedirectTrailingSlash = true
+	// comment if using Playground
 	server.Use(cors.New(cors.Config{
-		// AllowOrigins: []string{"*"},
-		AllowAllOrigins: true,
-		AllowHeaders:    []string{"*"},
-		ExposeHeaders:   []string{"x-auth-token"},
+		AllowOrigins:     []string{allowedOrigin},
+		AllowCredentials: true,
+		AllowHeaders:     []string{"Content-Type"},
 	}))
 	server.Use(contextToContextMiddleware())
 
-	server.POST("/query", graphqlHandler(Config{Resolvers: resolvers}))
+	server.POST("/query", graphqlHandler(generated.Config{Resolvers: resolvers}))
 	server.GET("/", playgroundHandler())
 
 	log.Fatal(server.Run())
 }
 
-func graphqlHandler(config Config) gin.HandlerFunc {
-	h := handler.GraphQL(NewExecutableSchema(config))
+func graphqlHandler(config generated.Config) gin.HandlerFunc {
+	h := handler.GraphQL(generated.NewExecutableSchema(config))
 
 	return func(c *gin.Context) {
 		h.ServeHTTP(c.Writer, c.Request)

@@ -9,6 +9,7 @@ require (
 	github.com/cpuguy83/go-md2man v1.0.10
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-contrib/cors v1.3.0
+	github.com/gin-contrib/sessions v0.0.3
 	github.com/gin-gonic/gin v1.5.0
 	github.com/go-chi/chi v4.0.2+incompatible
 	github.com/go-delve/delve v1.3.2 // indirect
@@ -33,6 +34,7 @@ require (
 	github.com/spf13/cobra v0.0.5 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/urfave/cli v1.22.0
+	github.com/utrack/gin-csrf v0.0.0-20190424104817-40fb8d2c8fca
 	github.com/vektah/gqlparser v1.2.0
 	go.starlark.net v0.0.0-20191218235703-9fcb808a6221 // indirect
 	golang.org/x/arch v0.0.0-20191126211547-368ea8f32fff // indirect
@@ -40,5 +42,6 @@ require (
 	golang.org/x/sys v0.0.0-20191220220014-0732a990476f // indirect
 	golang.org/x/tools v0.0.0-20191206204035-259af5ff87bd
 	gopkg.in/go-playground/validator.v9 v9.30.2 // indirect
+	gopkg.in/mailgun/mailgun-go.v1 v1.1.1
 	gopkg.in/yaml.v2 v2.2.7
 )

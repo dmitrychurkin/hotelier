@@ -239,3 +239,45 @@ FE:
 
 ? golang get token from authorization header bearer
 	- https://stackoverflow.com/questions/39518237/how-to-extract-and-verify-token-sent-from-frontend-in-golang
+
+? golang get domain name
+	- https://stackoverflow.com/questions/16512840/get-domain-name-from-ip-address-in-go
+	- https://stackoverflow.com/questions/23558425/how-do-i-get-the-local-ip-address-in-go
+	- https://stackoverflow.com/questions/16512840/get-domain-name-from-ip-address-in-go
+
+? how to set httpOnly cookie for cors
+	- https://stackoverflow.com/questions/46288437/set-cookies-for-cross-origin-requests
+	- https://medium.com/@_graphx/if-httponly-you-could-still-csrf-of-cors-you-can-5d7ee2c7443
+	- https://stackoverflow.com/questions/36365409/setting-cookies-with-cors-requests
+	- https://flaviocopes.com/golang-enable-cors/
+
+? golang get set cookie
+	- https://stackoverflow.com/questions/54275704/how-to-read-cookies-from-golang/54276297
+	- https://www.golangprograms.com/get-set-and-clear-session-in-golang.html
+	- https://www.socketloop.com/tutorials/golang-read-write-create-and-delete-cookie-example
+	- https://stackoverflow.com/questions/12130582/setting-cookies-with-net-http
+	- https://golangcode.com/add-a-http-cookie/
+
+? golang generate hash of string
+	- https://stackoverflow.com/questions/13582519/how-to-generate-hash-number-of-a-string-in-go
+	- https://stackoverflow.com/questions/22892120/how-to-generate-a-random-string-of-a-fixed-length-in-go
+	- https://gist.github.com/dopey/c69559607800d2f2f90b1b1ed4e550fb
+	- https://stackoverflow.com/questions/45267125/how-to-generate-unique-random-alphanumeric-tokens-in-golang
+
+? gin gonic cookies
+	- https://stackoverflow.com/questions/27234861/correct-way-of-getting-clients-ip-addresses-from-http-request
+	- https://github.com/gin-gonic/gin/issues/165
+	- https://gin-gonic.com/docs/examples/cookie/
+
+	- https://stackoverflow.com/questions/39492468/how-to-save-time-in-the-database-in-go-when-using-gorm-and-postgresql
+
+? golang mailgun
+	- thepolyglotdeveloper.com/2017/12/send-emails-mailgun-using-golang/
+	- https://tutorialedge.net/golang/sending-email-using-go-and-mailgun/
+	- !!!! https://medium.com/@durgaprasadbudhwani/sending-complex-html-email-with-mailgun-api-using-go-language-cfc5338a5b70
+	- !!!! https://github.com/Golang-Coach/Lessons/blob/master/GoMailer/mailer.go
+
+? golang url builder
+ - https://stackoverflow.com/questions/26984420/url-builder-query-builder-in-go
+ - https://stackoverflow.com/questions/23151827/how-to-get-url-in-http-request
+ - https://stackoverflow.com/questions/26984420/url-builder-query-builder-in-go

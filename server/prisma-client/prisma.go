@@ -8,10 +8,12 @@ import (
 
 	"os"
 
+	"github.com/prisma/prisma-client-lib-go"
+
+	"github.com/machinebox/graphql"
+
 	"github.com/joho/godotenv"
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/machinebox/graphql"
-	"github.com/prisma/prisma-client-lib-go"
 )
 
 var _ = godotenv.Load("../.env")
@@ -419,8 +421,9 @@ type UserSubscriptionWhereInput struct {
 }
 
 type UserWhereUniqueInput struct {
-	ID    *string `json:"id,omitempty"`
-	Email *string `json:"email,omitempty"`
+	ID                 *string `json:"id,omitempty"`
+	Email              *string `json:"email,omitempty"`
+	PasswordResetToken *string `json:"passwordResetToken,omitempty"`
 }
 
 type UserEdgeExec struct {

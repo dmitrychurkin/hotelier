@@ -10,7 +10,7 @@ type User {
   firstName: String
   lastName: String
   password: String!
-  passwordResetToken: String
+  passwordResetToken: String @unique
   passwordResetTokenCreatedAt: DateTime
   passwordResetTokenExpiresAt: DateTime
   role: UserRoles! @default(value: ADMIN)

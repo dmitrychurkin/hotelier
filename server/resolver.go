@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
-	"errors"
-	"fmt"
 
-	prisma "github.com/dmitrychurkin/hotelier/server/prisma-generated/prisma-client"
+	"github.com/dmitrychurkin/hotelier/server/graph/generated"
+	"github.com/dmitrychurkin/hotelier/server/models"
+	prisma "github.com/dmitrychurkin/hotelier/server/prisma-client"
 )
 
 // Resolver with prisma client
@@ -14,70 +14,47 @@ type Resolver struct {
 }
 
 // Mutation ...
-func (r *Resolver) Mutation() MutationResolver {
+func (r *Resolver) Mutation() generated.MutationResolver {
 	return &mutationResolver{r}
 }
 
 // Query ...
-func (r *Resolver) Query() QueryResolver {
+func (r *Resolver) Query() generated.QueryResolver {
 	return &queryResolver{r}
 }
 
 type mutationResolver struct{ *Resolver }
 
-func (r *mutationResolver) Login(ctx context.Context, email string, password string) (*prisma.User, error) {
-	return LoginHandler(ctx, r.Prisma, email, password)
+func (r *mutationResolver) Login(ctx context.Context, email string, password string) (*models.User, error) {
+	return Login(ctx, r.Prisma, email, password)
 }
-func (r *mutationResolver) Signup(ctx context.Context, email string, firstName *string, lastName *string, password string, confirmPassword string) (*prisma.User, error) {
-	return SignupHandler(ctx, r.Prisma, email, firstName, lastName, password, confirmPassword)
+func (r *mutationResolver) Signup(ctx context.Context, email string, firstName *string, lastName *string, password string, confirmPassword string) (*models.User, error) {
+	return Signup(ctx, r.Prisma, email, firstName, lastName, password, confirmPassword)
 }
-func (r *mutationResolver) SendPasswordResetLink(ctx context.Context, email string) (*prisma.User, error) {
-	panic("not implemented")
+func (r *mutationResolver) SendPasswordResetLink(ctx context.Context, email string, path string) (*bool, error) {
+	return SendPasswordResetLink(ctx, r.Prisma, email, path)
 }
-func (r *mutationResolver) ResetPassword(ctx context.Context, email string, password string, confirmPassword string, passwordResetToken string) (*prisma.User, error) {
-	panic("not implemented")
+func (r *mutationResolver) ResetPassword(ctx context.Context, email string, password string, confirmPassword string, passwordResetToken string) (*models.User, error) {
+	return ResetPassword(ctx, r.Prisma, email, password, confirmPassword, passwordResetToken)
+}
+func (r *mutationResolver) Logout(ctx context.Context) (*bool, error) {
+	return Logout(ctx)
 }
 
 type queryResolver struct{ *Resolver }
 
-func (r *queryResolver) UserByID(ctx context.Context, id string) (*prisma.User, error) {
-	// panic("not implemented")
-	gc, err := GinContextFromContext(ctx)
-	if err != nil {
-		return nil, err
-	}
-	req, res := gc.Request, gc.Writer
-	res.Header().Set("Access-Control-Expose-Headers", "*")
-	res.Header().Set("x-access-token", "12345")
-	res.Header().Set("x-refresh-token", "54321")
-	fmt.Println(req.Header.Get("x-test-context"))
-	return nil, errors.New("Work in progress :)")
-}
-func (r *queryResolver) UserByEmail(ctx context.Context, email string) (*prisma.User, error) {
+func (r *queryResolver) UserByID(ctx context.Context, id string) (*models.User, error) {
 	panic("not implemented")
 }
-func (r *queryResolver) Users(ctx context.Context) ([]prisma.User, error) {
-	// panic("not implemented")
-	gc, err := GinContextFromContext(ctx)
-	if err != nil {
-		return nil, err
-	}
-	fmt.Printf("%+v\n", gc)
-	// Loop over header names
-	for name, values := range gc.Request.Header {
-		// Loop over all values for the name.
-		for _, value := range values {
-			fmt.Println(name, value)
-		}
-	}
-	// //Iterate over all header fields
-	// for k, v := range contextData.Req.Header {
-	// 	fmt.Fprintf(contextData.Res, "Header field %q, Value %q\n", k, v)
-	// }
-	// fmt.Fprintf(contextData.Res, "Host = %q\n", contextData.Req.Host)
-	// fmt.Fprintf(contextData.Res, "RemoteAddr= %q\n", contextData.Req.RemoteAddr)
-	return nil, errors.New("Invalid request")
+func (r *queryResolver) UserByEmail(ctx context.Context, email string) (*models.User, error) {
+	panic("not implemented")
 }
-func (r *queryResolver) User(ctx context.Context) (*prisma.User, error) {
-	return UserHandler(ctx, r.Prisma)
+func (r *queryResolver) Users(ctx context.Context) ([]models.User, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) User(ctx context.Context) (*models.User, error) {
+	return User(ctx, r.Prisma)
+}
+func (r *queryResolver) ResetPasswordCreds(ctx context.Context, passwordResetToken string) (*models.ResetPasswordCreds, error) {
+	return ResetPasswordCreds(ctx, r.Prisma, passwordResetToken)
 }
