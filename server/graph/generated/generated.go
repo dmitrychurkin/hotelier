@@ -46,21 +46,17 @@ type ComplexityRoot struct {
 	Mutation struct {
 		Login                 func(childComplexity int, email string, password string) int
 		Logout                func(childComplexity int) int
-		ResetPassword         func(childComplexity int, email string, password string, confirmPassword string, passwordResetToken string) int
+		ResetPassword         func(childComplexity int, email string, password string, passwordResetToken string) int
 		SendPasswordResetLink func(childComplexity int, email string, path string) int
-		Signup                func(childComplexity int, email string, firstName *string, lastName *string, password string, confirmPassword string) int
+		Signup                func(childComplexity int, email string, firstName *string, lastName *string, password string) int
 	}
 
 	Query struct {
-		ResetPasswordCreds func(childComplexity int, passwordResetToken string) int
-		User               func(childComplexity int) int
-		UserByEmail        func(childComplexity int, email string) int
-		UserByID           func(childComplexity int, id string) int
-		Users              func(childComplexity int) int
-	}
-
-	ResetPasswordCreds struct {
-		Email func(childComplexity int) int
+		ResetPasswordCred func(childComplexity int, passwordResetToken string) int
+		User              func(childComplexity int) int
+		UserByEmail       func(childComplexity int, email string) int
+		UserByID          func(childComplexity int, id string) int
+		Users             func(childComplexity int) int
 	}
 
 	User struct {
@@ -76,9 +72,9 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	Login(ctx context.Context, email string, password string) (*models.User, error)
-	Signup(ctx context.Context, email string, firstName *string, lastName *string, password string, confirmPassword string) (*models.User, error)
+	Signup(ctx context.Context, email string, firstName *string, lastName *string, password string) (*models.User, error)
 	SendPasswordResetLink(ctx context.Context, email string, path string) (*bool, error)
-	ResetPassword(ctx context.Context, email string, password string, confirmPassword string, passwordResetToken string) (*models.User, error)
+	ResetPassword(ctx context.Context, email string, password string, passwordResetToken string) (*models.User, error)
 	Logout(ctx context.Context) (*bool, error)
 }
 type QueryResolver interface {
@@ -86,7 +82,7 @@ type QueryResolver interface {
 	UserByEmail(ctx context.Context, email string) (*models.User, error)
 	Users(ctx context.Context) ([]models.User, error)
 	User(ctx context.Context) (*models.User, error)
-	ResetPasswordCreds(ctx context.Context, passwordResetToken string) (*models.ResetPasswordCreds, error)
+	ResetPasswordCred(ctx context.Context, passwordResetToken string) (string, error)
 }
 
 type executableSchema struct {
@@ -133,7 +129,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.ResetPassword(childComplexity, args["email"].(string), args["password"].(string), args["confirmPassword"].(string), args["passwordResetToken"].(string)), true
+		return e.complexity.Mutation.ResetPassword(childComplexity, args["email"].(string), args["password"].(string), args["passwordResetToken"].(string)), true
 
 	case "Mutation.sendPasswordResetLink":
 		if e.complexity.Mutation.SendPasswordResetLink == nil {
@@ -157,19 +153,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.Signup(childComplexity, args["email"].(string), args["firstName"].(*string), args["lastName"].(*string), args["password"].(string), args["confirmPassword"].(string)), true
+		return e.complexity.Mutation.Signup(childComplexity, args["email"].(string), args["firstName"].(*string), args["lastName"].(*string), args["password"].(string)), true
 
-	case "Query.resetPasswordCreds":
-		if e.complexity.Query.ResetPasswordCreds == nil {
+	case "Query.resetPasswordCred":
+		if e.complexity.Query.ResetPasswordCred == nil {
 			break
 		}
 
-		args, err := ec.field_Query_resetPasswordCreds_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_resetPasswordCred_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.ResetPasswordCreds(childComplexity, args["passwordResetToken"].(string)), true
+		return e.complexity.Query.ResetPasswordCred(childComplexity, args["passwordResetToken"].(string)), true
 
 	case "Query.user":
 		if e.complexity.Query.User == nil {
@@ -208,13 +204,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Users(childComplexity), true
-
-	case "ResetPasswordCreds.email":
-		if e.complexity.ResetPasswordCreds.Email == nil {
-			break
-		}
-
-		return e.complexity.ResetPasswordCreds.Email(childComplexity), true
 
 	case "User.createdAt":
 		if e.complexity.User.CreatedAt == nil {
@@ -338,7 +327,8 @@ extend type Query {
   userByEmail(email: String!): User
   users: [User!]!
   user: User
-  resetPasswordCreds(passwordResetToken: String!): ResetPasswordCreds!
+  # resetPasswordCred will return an email
+  resetPasswordCred(passwordResetToken: String!): String!
 }
 
 extend type Mutation {
@@ -348,13 +338,11 @@ extend type Mutation {
     firstName: String
     lastName: String
     password: String!
-    confirmPassword: String!
   ): User
   sendPasswordResetLink(email: String!, path: String!): Boolean
   resetPassword(
     email: String!
     password: String!
-    confirmPassword: String!
     passwordResetToken: String!
   ): User
   logout: Boolean
@@ -364,10 +352,6 @@ enum UserRoles {
   ADMIN
   OWNER
   EMPLOYER
-}
-
-type ResetPasswordCreds {
-  email: String!
 }
 
 type User {
@@ -432,21 +416,13 @@ func (ec *executionContext) field_Mutation_resetPassword_args(ctx context.Contex
 	}
 	args["password"] = arg1
 	var arg2 string
-	if tmp, ok := rawArgs["confirmPassword"]; ok {
+	if tmp, ok := rawArgs["passwordResetToken"]; ok {
 		arg2, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["confirmPassword"] = arg2
-	var arg3 string
-	if tmp, ok := rawArgs["passwordResetToken"]; ok {
-		arg3, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["passwordResetToken"] = arg3
+	args["passwordResetToken"] = arg2
 	return args, nil
 }
 
@@ -507,14 +483,6 @@ func (ec *executionContext) field_Mutation_signup_args(ctx context.Context, rawA
 		}
 	}
 	args["password"] = arg3
-	var arg4 string
-	if tmp, ok := rawArgs["confirmPassword"]; ok {
-		arg4, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["confirmPassword"] = arg4
 	return args, nil
 }
 
@@ -532,7 +500,7 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_resetPasswordCreds_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_resetPasswordCred_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -677,7 +645,7 @@ func (ec *executionContext) _Mutation_signup(ctx context.Context, field graphql.
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().Signup(rctx, args["email"].(string), args["firstName"].(*string), args["lastName"].(*string), args["password"].(string), args["confirmPassword"].(string))
+		return ec.resolvers.Mutation().Signup(rctx, args["email"].(string), args["firstName"].(*string), args["lastName"].(*string), args["password"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -759,7 +727,7 @@ func (ec *executionContext) _Mutation_resetPassword(ctx context.Context, field g
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().ResetPassword(rctx, args["email"].(string), args["password"].(string), args["confirmPassword"].(string), args["passwordResetToken"].(string))
+		return ec.resolvers.Mutation().ResetPassword(rctx, args["email"].(string), args["password"].(string), args["passwordResetToken"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -961,7 +929,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 	return ec.marshalOUser2ᚖgithubᚗcomᚋdmitrychurkinᚋhotelierᚋserverᚋmodelsᚐUser(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_resetPasswordCreds(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_resetPasswordCred(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -978,7 +946,7 @@ func (ec *executionContext) _Query_resetPasswordCreds(ctx context.Context, field
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_resetPasswordCreds_args(ctx, rawArgs)
+	args, err := ec.field_Query_resetPasswordCred_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -987,7 +955,7 @@ func (ec *executionContext) _Query_resetPasswordCreds(ctx context.Context, field
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().ResetPasswordCreds(rctx, args["passwordResetToken"].(string))
+		return ec.resolvers.Query().ResetPasswordCred(rctx, args["passwordResetToken"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -999,10 +967,10 @@ func (ec *executionContext) _Query_resetPasswordCreds(ctx context.Context, field
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*models.ResetPasswordCreds)
+	res := resTmp.(string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNResetPasswordCreds2ᚖgithubᚗcomᚋdmitrychurkinᚋhotelierᚋserverᚋmodelsᚐResetPasswordCreds(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1078,43 +1046,6 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _ResetPasswordCreds_email(ctx context.Context, field graphql.CollectedField, obj *models.ResetPasswordCreds) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "ResetPasswordCreds",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Email, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
@@ -2627,7 +2558,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				res = ec._Query_user(ctx, field)
 				return res
 			})
-		case "resetPasswordCreds":
+		case "resetPasswordCred":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -2635,7 +2566,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_resetPasswordCreds(ctx, field)
+				res = ec._Query_resetPasswordCred(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -2645,33 +2576,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
 			out.Values[i] = ec._Query___schema(ctx, field)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var resetPasswordCredsImplementors = []string{"ResetPasswordCreds"}
-
-func (ec *executionContext) _ResetPasswordCreds(ctx context.Context, sel ast.SelectionSet, obj *models.ResetPasswordCreds) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.RequestContext, sel, resetPasswordCredsImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("ResetPasswordCreds")
-		case "email":
-			out.Values[i] = ec._ResetPasswordCreds_email(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3019,20 +2923,6 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) marshalNResetPasswordCreds2githubᚗcomᚋdmitrychurkinᚋhotelierᚋserverᚋmodelsᚐResetPasswordCreds(ctx context.Context, sel ast.SelectionSet, v models.ResetPasswordCreds) graphql.Marshaler {
-	return ec._ResetPasswordCreds(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNResetPasswordCreds2ᚖgithubᚗcomᚋdmitrychurkinᚋhotelierᚋserverᚋmodelsᚐResetPasswordCreds(ctx context.Context, sel ast.SelectionSet, v *models.ResetPasswordCreds) graphql.Marshaler {
-	if v == nil {
-		if !ec.HasError(graphql.GetResolverContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._ResetPasswordCreds(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {

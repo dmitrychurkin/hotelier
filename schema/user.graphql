@@ -5,7 +5,8 @@ extend type Query {
   userByEmail(email: String!): User
   users: [User!]!
   user: User
-  resetPasswordCreds(passwordResetToken: String!): ResetPasswordCreds!
+  # resetPasswordCred will return an email
+  resetPasswordCred(passwordResetToken: String!): String!
 }
 
 extend type Mutation {
@@ -15,13 +16,11 @@ extend type Mutation {
     firstName: String
     lastName: String
     password: String!
-    confirmPassword: String!
   ): User
   sendPasswordResetLink(email: String!, path: String!): Boolean
   resetPassword(
     email: String!
     password: String!
-    confirmPassword: String!
     passwordResetToken: String!
   ): User
   logout: Boolean
@@ -31,10 +30,6 @@ enum UserRoles {
   ADMIN
   OWNER
   EMPLOYER
-}
-
-type ResetPasswordCreds {
-  email: String!
 }
 
 type User {

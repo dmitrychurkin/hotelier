@@ -4,20 +4,12 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
-	"errors"
-	"net/http"
 	"os"
-	"regexp"
 	"strconv"
-	"strings"
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/dmitrychurkin/hotelier/server/mailer"
-	"github.com/dmitrychurkin/hotelier/server/models"
 	prisma "github.com/dmitrychurkin/hotelier/server/prisma-client"
-	"github.com/vektah/gqlparser/gqlerror"
-	"golang.org/x/crypto/bcrypt"
 )
 
 const (
@@ -31,6 +23,7 @@ const (
 	defaultPasswordHashRounds       = 14
 )
 
+/*
 // User resolver
 func User(ctx context.Context, p *prisma.Client) (*models.User, error) {
 	// 1. get jwt token claims
@@ -319,12 +312,15 @@ func SendPasswordResetLink(ctx context.Context, p *prisma.Client, email, path st
 		host = host[:i]
 	}
 
-	emailAgent := mailer.ResetPasswordData{Link: link}
+	from := "no-reply@" + host
+	if !govalidator.IsEmail(from) {
+		from = ""
+	}
+
+	emailAgent := &mailer.ResetPasswordData{Link: link}
 	success, err = emailAgent.Send(&mailer.MailRequest{
-		// uncomment on prod
-		// From:  "no-reply@" + host,
-		// Title: "Reset Password Email",
-		To: []string{user.Email},
+		From: from,
+		To:   []string{user.Email},
 	})
 	return &success, err
 }
@@ -425,7 +421,7 @@ func ResetPassword(ctx context.Context, p *prisma.Client, email, password, confi
 		UpdatedAt: user.UpdatedAt,
 	}, nil
 }
-
+*/
 func generateURLHash(n int) (string, error) {
 	bytes := make([]byte, n)
 	_, err := rand.Read(bytes)

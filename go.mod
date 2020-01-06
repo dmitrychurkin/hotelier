@@ -5,6 +5,7 @@ go 1.13
 require (
 	github.com/99designs/gqlgen v0.10.2
 	github.com/agnivade/levenshtein v1.0.3
+	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
 	github.com/cosiner/argv v0.0.1 // indirect
 	github.com/cpuguy83/go-md2man v1.0.10
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
