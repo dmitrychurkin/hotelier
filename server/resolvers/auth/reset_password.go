@@ -53,6 +53,10 @@ func ResetPassword(ctx *context.Context, gc *gin.Context, p *prisma.Client, emai
 		return nil, err
 	}
 
+	if user.PasswordResetToken == nil || len(*user.PasswordResetToken) == 0 {
+		return nil, invalidPasswordResetToken
+	}
+
 	expiresAt, err := time.Parse(time.RFC3339, *user.PasswordResetTokenExpiresAt)
 
 	if err != nil {
@@ -91,7 +95,7 @@ func ResetPassword(ctx *context.Context, gc *gin.Context, p *prisma.Client, emai
 
 	// 5. issue auth token
 	// 6. set cookie
-	if err := issueAuthToken(ctx, gc, user); err != nil {
+	if err := issueAuthToken(gc, user.ID); err != nil {
 		return nil, err
 	}
 

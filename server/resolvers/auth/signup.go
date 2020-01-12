@@ -23,7 +23,7 @@ type signupInput struct {
 // Signup resolver
 func Signup(ctx *context.Context, gc *gin.Context, p *prisma.Client, email string, firstName *string, lastName *string, password string) (*models.User, error) {
 	// 1. validate input
-	email, password, fName, lName :=
+	email, password, *firstName, *lastName =
 		govalidator.Trim(email, ""),
 		govalidator.Trim(password, ""),
 		// govalidator.Trim(confirmPassword, ""),
@@ -34,8 +34,8 @@ func Signup(ctx *context.Context, gc *gin.Context, p *prisma.Client, email strin
 		Email:    email,
 		Password: password,
 		// ConfirmPassword: confirmPassword,
-		FirstName: &fName,
-		LastName:  &lName,
+		FirstName: firstName,
+		LastName:  lastName,
 	})
 
 	// if strings.Compare(password, confirmPassword) != 0 {
@@ -61,8 +61,8 @@ func Signup(ctx *context.Context, gc *gin.Context, p *prisma.Client, email strin
 	user, err := p.CreateUser(prisma.UserCreateInput{
 		Email:     email,
 		Password:  string(hash),
-		FirstName: &fName,
-		LastName:  &lName,
+		FirstName: firstName,
+		LastName:  lastName,
 	}).Exec(*ctx)
 
 	if err != nil {
@@ -71,7 +71,7 @@ func Signup(ctx *context.Context, gc *gin.Context, p *prisma.Client, email strin
 
 	// 4. issue auth token
 	// 5. set cookie
-	if err := issueAuthToken(ctx, gc, user); err != nil {
+	if err := issueAuthToken(gc, user.ID); err != nil {
 		return nil, err
 	}
 

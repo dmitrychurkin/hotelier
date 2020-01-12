@@ -281,3 +281,43 @@ FE:
  - https://stackoverflow.com/questions/26984420/url-builder-query-builder-in-go
  - https://stackoverflow.com/questions/23151827/how-to-get-url-in-http-request
  - https://stackoverflow.com/questions/26984420/url-builder-query-builder-in-go
+
+? golang valid domain name
+- https://stackoverflow.com/questions/48239113/how-to-check-whether-hostname-is-domain-name-in-go
+- https://gist.github.com/chmike/d4126a3247a6d9a70922fc0e8b4f4013
+- https://godoc.org/github.com/asaskevich/govalidator
+
+? golang backtick string
+- https://stackoverflow.com/questions/46917331/what-is-the-difference-between-backticks-double-quotes-in-golang/46925368
+- https://stackoverflow.com/questions/30681054/what-is-the-usage-of-backtick-in-golang-structs-definition
+- https://stackoverflow.com/questions/10858787/what-are-the-uses-for-tags-in-go
+
+? golang tag params
+- https://medium.com/golangspec/tags-in-golang-3e5db0b8ef3e
+
+? compare two strings
+- https://stackoverflow.com/questions/34383705/how-do-i-compare-strings-in-golang
+
+? nil pointer detection
+- https://stackoverflow.com/questions/20240179/nil-detection-in-go
+- https://www.golangprograms.com/how-to-check-pointer-or-interface-is-nil.html
+
+? golang string interpolation
+- https://stackoverflow.com/questions/11123865/format-a-go-string-without-printing
+- https://stackoverflow.com/questions/50095616/go-string-interpolation
+- https://yourbasic.org/golang/fmt-printf-reference-cheat-sheet/#sprintf-format-without-printing
+
+? apollo delete type from cache
+- https://medium.com/@martinseanhunt/how-to-invalidate-cached-data-in-apollo-and-handle-updating-paginated-queries-379e4b9e4698
+- https://stackoverflow.com/questions/48596265/deleting-apollo-client-cache-for-a-given-query-and-every-set-of-variables
+
+- https://stackoverflow.com/questions/40541994/multiple-path-names-for-a-same-component-in-react-router
+
+? golang assign value to pointer
+- https://stackoverflow.com/questions/43811652/golang-assigning-a-value-to-struct-member-that-is-a-pointer
+- https://medium.com/rungo/pointers-in-go-a789eafccd53
+- https://www.callicoder.com/golang-pointers/
+
+? golang after request middleware
+- https://drstearns.github.io/tutorials/gomiddleware/
+- https://stackoverflow.com/questions/43976539/run-middleware-after-gorilla-mux-handling

@@ -39,7 +39,7 @@ func Login(ctx *context.Context, gc *gin.Context, p *prisma.Client, email string
 
 	// 4. issue auth token
 	// 5. set cookie
-	if err := issueAuthToken(ctx, gc, user); err != nil {
+	if err := issueAuthToken(gc, user.ID); err != nil {
 		return nil, err
 	}
 

@@ -1,17 +1,5 @@
 package main
 
-import (
-	"context"
-	"crypto/rand"
-	"encoding/base64"
-	"os"
-	"strconv"
-	"time"
-
-	jwt "github.com/dgrijalva/jwt-go"
-	prisma "github.com/dmitrychurkin/hotelier/server/prisma-client"
-)
-
 const (
 	maxLength                       = 1000
 	reEmail                         = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
@@ -421,7 +409,7 @@ func ResetPassword(ctx context.Context, p *prisma.Client, email, password, confi
 		UpdatedAt: user.UpdatedAt,
 	}, nil
 }
-*/
+
 func generateURLHash(n int) (string, error) {
 	bytes := make([]byte, n)
 	_, err := rand.Read(bytes)
@@ -519,3 +507,5 @@ func issueAuthToken(ctx context.Context, user *prisma.User) error {
 
 	return nil
 }
+
+*/

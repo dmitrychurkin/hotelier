@@ -33,13 +33,17 @@ func main() {
 	}
 
 	server.RedirectTrailingSlash = true
-	// comment if using Playground
-	server.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{allowedOrigin},
-		AllowCredentials: true,
-		AllowHeaders:     []string{"Content-Type"},
-	}))
-	server.Use(contextToContextMiddleware())
+
+	server.Use(
+		// comment if using Playground
+		cors.New(cors.Config{
+			AllowOrigins:     []string{allowedOrigin},
+			AllowCredentials: true,
+			AllowHeaders:     []string{"Content-Type"},
+		}),
+		contextToContextMiddleware(),
+	)
+	// server.Use(contextToContextMiddleware())
 
 	server.POST("/query", graphqlHandler(generated.Config{Resolvers: resolvers}))
 	server.GET("/", playgroundHandler())

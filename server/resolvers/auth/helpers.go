@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"context"
 	"crypto/rand"
 	"encoding/base64"
 	"os"
@@ -9,11 +8,10 @@ import (
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
-	prisma "github.com/dmitrychurkin/hotelier/server/prisma-client"
 	"github.com/gin-gonic/gin"
 )
 
-func parseAuthToken(ctx *context.Context, gc *gin.Context) (*jwt.StandardClaims, error) {
+func parseAuthToken(gc *gin.Context) (*jwt.StandardClaims, error) {
 	var (
 		authTokenSecret     = os.Getenv("AUTH_TOKEN_SECRET")
 		authTokenCookieName = os.Getenv("AUTH_TOKEN_COOKIE_NAME")
@@ -58,7 +56,7 @@ func parseAuthToken(ctx *context.Context, gc *gin.Context) (*jwt.StandardClaims,
 	return claims, err
 }
 
-func issueAuthToken(ctx *context.Context, gc *gin.Context, user *prisma.User) error {
+func issueAuthToken(gc *gin.Context, userID string) error {
 	var (
 		authTokenSecret     = os.Getenv("AUTH_TOKEN_SECRET")
 		authTokenLifetime   = os.Getenv("AUTH_TOKEN_LIFETIME")
@@ -76,7 +74,7 @@ func issueAuthToken(ctx *context.Context, gc *gin.Context, user *prisma.User) er
 	}
 
 	authTokenClaims := &jwt.StandardClaims{
-		Subject:   user.ID,
+		Subject:   userID,
 		ExpiresAt: time.Now().Add(time.Duration(authTokenMin) * time.Minute).Unix(),
 	}
 

@@ -13,7 +13,7 @@ import (
 // User resolver
 func User(ctx *context.Context, gc *gin.Context, p *prisma.Client) (*models.User, error) {
 	// 1. get jwt token claims
-	claims, err := parseAuthToken(ctx, gc)
+	claims, err := parseAuthToken(gc)
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +37,7 @@ func User(ctx *context.Context, gc *gin.Context, p *prisma.Client) (*models.User
 
 	// 3. issue auth token
 	// 4. set cookie
-	if err := issueAuthToken(ctx, gc, user); err != nil {
+	if err := issueAuthToken(gc, user.ID); err != nil {
 		return nil, err
 	}
 
